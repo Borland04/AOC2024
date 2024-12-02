@@ -1,15 +1,9 @@
-use std::io::{prelude::*, Result};
-use std::{fs::File, io::BufReader};
+use std::io::Result;
 
-pub fn run(input_filename: &str) -> Result<()> {
-    let input_file = File::open(input_filename)?;
-    let buf_input = BufReader::new(input_file);
-    let input = buf_input.lines();
-
+pub fn run(input: &mut dyn Iterator<Item = String>) -> Result<()> {
     let (mut left_list, mut right_list) = input
         .map(|l| {
-            l.expect("IO error")
-                .split(" ")
+            l.split(" ")
                 .filter(|sub_l| !sub_l.is_empty())
                 .map(|sub_l| {
                     sub_l
