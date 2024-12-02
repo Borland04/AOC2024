@@ -27,17 +27,17 @@ pub fn run(input_filename: &str) -> Result<()> {
             },
         );
 
-    left_list.sort();
-    right_list.sort();
-
     let result = left_list
         .iter()
-        .zip(right_list)
-        .map(|(l, r)| (l - r).abs())
+        .map(|i| i * (calculate_occurrences(i, &right_list) as i32))
         .reduce(|acc, i| acc + i)
         .unwrap_or(0);
 
     println!("{}", result);
 
     Ok(())
+}
+
+fn calculate_occurrences<T: PartialEq>(item: &T, list: &Vec<T>) -> usize {
+    list.iter().filter(|i| item.eq(i)).count()
 }
