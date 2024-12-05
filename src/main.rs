@@ -4,11 +4,13 @@ use std::{fs::File, io::BufReader};
 mod day_01;
 mod day_02;
 mod day_03;
+mod day_04;
 
 fn main() {
-    // day_01::run(&mut read_input("inputs/01.txt")).expect("Failed run of puzzle");
+    //day_01::run(&mut read_input("inputs/01.txt")).expect("Failed run of puzzle");
     //day_02::run(&mut read_input("inputs/02.txt")).expect("Failed run of puzzle");
-    day_03::run(&mut read_input("inputs/03.txt")).expect("Failed run of puzzle");
+    //day_03::run(&mut read_input("inputs/03.txt")).expect("Failed run of puzzle");
+    day_04::run(&mut read_input("inputs/04.txt")).expect("Failed run of puzzle");
 }
 
 fn read_input(fname: &str) -> impl Iterator<Item = String> {
