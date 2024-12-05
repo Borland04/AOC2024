@@ -1,6 +1,7 @@
 use std::io;
 
-const XMAS: &str = "XMAS";
+const XMAS: &str = "MAS";
+const XMAS_REVERSED: &str = "SAM";
 
 pub fn run(input: &mut dyn Iterator<Item = String>) -> io::Result<()> {
     let input_matrix: Vec<Vec<char>> = input.map(|str| str.chars().collect()).collect();
@@ -13,27 +14,18 @@ pub fn run(input: &mut dyn Iterator<Item = String>) -> io::Result<()> {
 fn calculate(input_matrix: &Vec<Vec<char>>) -> u32 {
     let w = input_matrix[0].len();
     let h = input_matrix.len();
-
-    let directions: Vec<(i32, i32)> = vec![
-        (1, 0),
-        (-1, 0),
-        (0, 1),
-        (0, -1),
-        (1, 1),
-        (1, -1),
-        (-1, 1),
-        (-1, -1),
-    ];
+    let x_mas_shift = XMAS.len() as i32 - 1;
 
     let mut result = 0;
-    for y in 0..h {
-        for x in 0..w {
-            result += directions
-                .iter()
-                .filter(|(dx, dy)| {
-                    check_occurrence(x as i32, y as i32, *dx, *dy, input_matrix, XMAS)
-                })
-                .count();
+    for y in 0..h as i32 {
+        for x in 0..w as i32 {
+            if (check_occurrence(x, y, 1, 1, input_matrix, XMAS)
+                || check_occurrence(x, y, 1, 1, input_matrix, XMAS_REVERSED))
+                && (check_occurrence(x + x_mas_shift, y, -1, 1, input_matrix, XMAS)
+                    || check_occurrence(x + x_mas_shift, y, -1, 1, input_matrix, XMAS_REVERSED))
+            {
+                result += 1;
+            }
         }
     }
 
