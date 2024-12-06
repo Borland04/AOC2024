@@ -1,9 +1,12 @@
-use std::{collections::hash_set, io};
+use std::{
+    collections::{hash_set, HashSet},
+    io,
+};
 
 pub fn run(input: &mut dyn Iterator<Item = String>) -> io::Result<()> {
     let map = parse_input(input);
 
-    let result = traverse_guard(&map).len();
+    let result = solve(&map);
 
     println!("{}", result);
 
@@ -17,7 +20,7 @@ enum MapItem {
     Guard(Direction),
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum Direction {
     Left,
     Up,
@@ -42,7 +45,7 @@ fn parse_input(input: &mut dyn Iterator<Item = String>) -> Vec<Vec<MapItem>> {
         .collect()
 }
 
-fn traverse_guard(map: &Vec<Vec<MapItem>>) -> hash_set::HashSet<(i32, i32)> {
+fn solve(map: &Vec<Vec<MapItem>>) -> i32 {
     let mut maybe_guard = None;
     for y in 0..map.len() {
         if let Some(_) = maybe_guard {
@@ -57,19 +60,46 @@ fn traverse_guard(map: &Vec<Vec<MapItem>>) -> hash_set::HashSet<(i32, i32)> {
         }
     }
 
-    let mut guard = maybe_guard.expect("Cannot find guard on a map");
-    let mut result: hash_set::HashSet<(i32, i32)> = hash_set::HashSet::new();
+    let mut result: HashSet<(i32, i32)> = HashSet::new();
 
-    while is_on_map(guard.1 .0, guard.1 .1, map) {
-        result.insert((guard.1 .0, guard.1 .1));
-        guard = step(guard, map);
+    let initial_guard = maybe_guard.expect("Cannot find guard on a map");
+
+    let mut obstacle = step(initial_guard, map);
+    while is_on_map(obstacle.1 .0, obstacle.1 .1, map) {
+        let (_, (obstacle_x, obstacle_y)) = obstacle;
+        let mut tmp_map: Vec<Vec<MapItem>> = map.iter().map(|row| row.clone()).collect();
+        tmp_map[obstacle_y as usize][obstacle_x as usize] = MapItem::Obstacle;
+
+        if is_looping(initial_guard, &tmp_map) {
+            result.insert(obstacle.1);
+        }
+
+        obstacle = step(obstacle, map);
     }
 
-    result
+    result.len() as i32
+}
+
+fn is_looping(guard: (Direction, (i32, i32)), map: &Vec<Vec<MapItem>>) -> bool {
+    let mut history: hash_set::HashSet<(Direction, (i32, i32))> = HashSet::new();
+
+    let mut guard_current = guard;
+
+    loop {
+        if !is_on_map(guard_current.1 .0, guard_current.1 .1, map) {
+            return false;
+        }
+
+        if history.contains(&guard_current) {
+            return true;
+        }
+
+        history.insert(guard_current);
+        guard_current = step(guard_current, map);
+    }
 }
 
 fn step(guard: (Direction, (i32, i32)), map: &Vec<Vec<MapItem>>) -> (Direction, (i32, i32)) {
-    println!("{:?}", guard);
     let (dir, (x, y)) = guard;
     let dx = match dir {
         Direction::Left => -1,
