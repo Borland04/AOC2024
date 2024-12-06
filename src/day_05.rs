@@ -6,7 +6,8 @@ pub fn run(input: &mut dyn Iterator<Item = String>) -> io::Result<()> {
 
     let result: u32 = updates
         .iter()
-        .filter(|update| is_update_valid(&update, &left_to_rights_map))
+        .filter(|update| !is_update_valid(&update, &left_to_rights_map))
+        .map(|update| correct_update(&update, &left_to_rights_map))
         .map(|update| {
             let middle_idx = update.len() / 2;
             update[middle_idx]
@@ -91,4 +92,37 @@ fn is_update_valid(
     }
 
     true
+}
+
+fn correct_update(
+    update: &Vec<u32>,
+    left_to_rights_map: &hash_map::HashMap<u32, Vec<u32>>,
+) -> Vec<u32> {
+    let mut result = update.clone();
+
+    let mut i = 1;
+    while i < result.len() {
+        let mut j = 0;
+        let item = result[i];
+        let maybe_rights = left_to_rights_map.get(&item);
+        if maybe_rights.is_none() {
+            i += 1;
+            continue;
+        }
+        let rights = maybe_rights.unwrap();
+
+        while j < i {
+            if rights.contains(&result[j]) {
+                let item_to_move = result.remove(j);
+                result.insert(i, item_to_move);
+                i -= 1;
+            } else {
+                j += 1;
+            }
+        }
+
+        i += 1;
+    }
+
+    result
 }
