@@ -5,15 +5,7 @@ defmodule Day09 do
       |> unfold_disk()
       |> defragment
 
-    result =
-      Stream.zip([Stream.iterate(0, &(&1 + 1)), defragmented_disk])
-      |> Enum.map(fn {idx, elem} ->
-        case elem do
-          {:file, file_id} -> idx * file_id
-          _ -> 0
-        end
-      end)
-      |> Enum.sum()
+    result = calculate_result(defragmented_disk, 0)
 
     IO.puts(result)
   end
@@ -38,17 +30,17 @@ defmodule Day09 do
   def unfold_disk([num | nums], :empty, prev_file_id) do
     next_block_type = :file
     next_file_id = prev_file_id + 1
-    current_block = {:file, next_file_id}
+    current_block = {:file, next_file_id, num}
 
-    List.duplicate(current_block, num) ++ unfold_disk(nums, next_block_type, next_file_id)
+    [current_block | unfold_disk(nums, next_block_type, next_file_id)]
   end
 
   def unfold_disk([num | nums], :file, prev_file_id) do
     next_block_type = :empty
     next_file_id = prev_file_id
-    current_block = {:empty}
+    current_block = {:empty, num}
 
-    List.duplicate(current_block, num) ++ unfold_disk(nums, next_block_type, next_file_id)
+    [current_block | unfold_disk(nums, next_block_type, next_file_id)]
   end
 
   def defragment([]) do
@@ -56,38 +48,87 @@ defmodule Day09 do
   end
 
   def defragment(disk) do
-    {prevs, nexts} = Enum.split_while(disk, &(&1 != {:empty}))
-
-    cond do
-      nexts == [] ->
-        prevs
-
-      true ->
-        [empty_elem | nexts_tail] = nexts
-        {last_file_block, new_tail} = remove_last_if(nexts_tail, &(&1 != {:empty}))
-
-        case last_file_block do
-          :none -> prevs ++ nexts
-          _ -> prevs ++ [last_file_block | defragment(new_tail) ++ [empty_elem]]
+    {head_with_file_at_right, empty_tail} =
+      split_while_right(disk, fn item ->
+        case item do
+          {:empty, _} -> true
+          _ -> false
         end
-    end
-  end
+      end)
 
-  def remove_last_if([], _) do
-    {:none, []}
-  end
-
-  def remove_last_if([a | as], cond) do
-    {removed_elem, tail} = remove_last_if(as, cond)
-
-    if removed_elem != :none do
-      {removed_elem, [a | tail]}
+    if head_with_file_at_right == [] do
+      empty_tail
     else
-      if cond.(a) do
-        {a, as}
-      else
-        {:none, [a | as]}
+      last_file = List.last(head_with_file_at_right)
+      {:file, _, file_size} = last_file
+
+      without_last_file =
+        List.delete_at(head_with_file_at_right, length(head_with_file_at_right) - 1)
+
+      {split_heads, split_tail} =
+        Enum.split_while(without_last_file, fn elem ->
+          case elem do
+            {:empty, empty_size} when empty_size >= file_size -> false
+            _ -> true
+          end
+        end)
+
+      case split_tail do
+        [] ->
+          defragment(without_last_file) ++ [last_file | empty_tail]
+
+        [{:empty, s} | others] ->
+          rem_empty_size = s - file_size
+
+          rem_empty =
+            if rem_empty_size == 0 do
+              []
+            else
+              [{:empty, rem_empty_size}]
+            end
+
+          defragment(
+            split_heads ++
+              [last_file] ++
+              rem_empty ++
+              others
+          ) ++ [{:empty, file_size} | empty_tail]
       end
     end
+  end
+
+  def split_while_right([], _) do
+    {[], []}
+  end
+
+  def split_while_right([a | as], cond) do
+    {sub_left, sub_right} = split_while_right(as, cond)
+
+    if sub_left == [] do
+      if cond.(a) do
+        {[], [a | sub_right]}
+      else
+        {[a], sub_right}
+      end
+    else
+      {[a | sub_left], sub_right}
+    end
+  end
+
+  def calculate_result([], _) do
+    0
+  end
+
+  def calculate_result([{:file, file_idx, file_size} | tail], idx) do
+    file_checksum =
+      idx..(idx + (file_size - 1))
+      |> Enum.map(&(&1 * file_idx))
+      |> Enum.sum()
+
+    file_checksum + calculate_result(tail, idx + file_size)
+  end
+
+  def calculate_result([{:empty, empty_size} | tail], idx) do
+    calculate_result(tail, idx + empty_size)
   end
 end
