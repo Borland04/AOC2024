@@ -9,6 +9,7 @@ mod day_05;
 mod day_06;
 mod day_08;
 mod day_10;
+mod day_11;
 
 fn main() {
     //day_01::run(&mut read_input("inputs/01.txt")).expect("Failed run of puzzle");
@@ -17,8 +18,9 @@ fn main() {
     //day_04::run(&mut read_input("inputs/04.txt")).expect("Failed run of puzzle");
     //day_05::run(&mut read_input("inputs/05.txt")).expect("Failed run of puzzle");
     //day_06::run(&mut read_input("inputs/06.txt")).expect("Failed run of puzzle");
-    // day_08::run(&mut read_input("inputs/08.txt")).expect("Failed run of puzzle");
-    day_10::run(&mut read_input("inputs/10.txt")).expect("Failed run of puzzle");
+    //day_08::run(&mut read_input("inputs/08.txt")).expect("Failed run of puzzle");
+    //day_10::run(&mut read_input("inputs/10.txt")).expect("Failed run of puzzle");
+    day_11::run(&mut read_input("inputs/11.txt")).expect("Failed run of puzzle");
 }
 
 fn read_input(fname: &str) -> impl Iterator<Item = String> {
