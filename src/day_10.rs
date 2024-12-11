@@ -27,11 +27,7 @@ fn solve(map: &Vec<Vec<u8>>) -> i32 {
         for x in 0..map[y].len() {
             if map[y][x] == 0 {
                 let trails = find_trails(x as i32, y as i32, map, 0);
-                result += trails
-                    .iter()
-                    .map(|tr| *tr.last().unwrap())
-                    .collect::<HashSet<(i32, i32)>>()
-                    .len();
+                result += trails.iter().map(|tr| *tr.last().unwrap()).len();
             }
         }
     }
