@@ -15,6 +15,8 @@ defmodule Aoc2024Elixir do
   require Day01
   require Day02
   require Day07
+  require Day09
+  require Day11
 
   def start(_type, _args) do
     # IO.puts("## Day 01 ##")
@@ -29,8 +31,12 @@ defmodule Aoc2024Elixir do
     # Day07.run(File.stream!("../inputs/07.txt", :line))
     # IO.puts("############")
 
-    IO.puts("## Day 09 ##")
-    Day09.run(File.stream!("../inputs/09.txt", :line))
+    # IO.puts("## Day 09 ##")
+    # Day09.run(File.stream!("../inputs/09.txt", :line))
+    # IO.puts("############")
+
+    IO.puts("## Day 11 ##")
+    Day11.run(File.stream!("../inputs/11.txt", :line))
     IO.puts("############")
 
     {:ok, self()}
